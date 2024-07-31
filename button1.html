@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Button 1 Page</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 300px;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+        .header, .footer {
+            width: 100%;
+            text-align: center;
+        }
+        .hidden {
+            display: none;
+        }
+        .btn, .btn-logout {
+            padding: 10px;
+            margin-top: 10px;
+            cursor: pointer;
+            width: 100%;
+            border: none;
+            border-radius: 4px;
+            color: white;
+            font-size: 16px;
+        }
+        .btn {
+            background-color: #007BFF;
+        }
+        .btn:hover {
+            background-color: #0056b3;
+        }
+        .btn-logout {
+            background-color: #FF0000;
+        }
+        .btn-logout:hover {
+            background-color: #cc0000;
+        }
+        .back-icon {
+            cursor: pointer;
+            font-size: 24px;
+            color: #007BFF;
+            position: absolute;
+            left: 10px;
+            top: 10px;
+        }
+        .back-icon:hover {
+            color: #0056b3;
+        }
+        .list-container {
+            width: 100%;
+            max-height: 200px; /* Adjust the height as needed */
+            overflow-y: auto;
+            margin-top: 10px;
+        }
+        .list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid #ccc;
+            text-align: left;
+        }
+        .icons {
+            display: flex;
+            gap: 10px;
+        }
+        .icon {
+            cursor: pointer;
+            color: #007BFF;
+        }
+        .icon:hover {
+            color: #0056b3;
+        }
+        .btn-cancel {
+            background-color: #6c757d;
+            width: calc(50% - 5px);
+        }
+        .btn-cancel:hover {
+            background-color: #5a6268;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <span class="back-icon" onclick="goBack()">←</span>
+        <h1>Button 1 Page</h1>
+        <button class="btn" onclick="showPopup()">+</button>
+    </div>
+    <div id="popup" class="hidden">
+        <input type="text" id="item-text" placeholder="Enter text" />
+        <div style="display: flex; justify-content: space-between;">
+            <button class="btn" onclick="saveItem()">Save</button>
+            <button class="btn btn-cancel" onclick="cancelPopup()">Cancel</button>
+        </div>
+    </div>
+    <div class="list-container" id="list-container"></div>
+    <div class="footer">
+        <button class="btn-logout" onclick="logout()">Logout</button>
+    </div>
+</div>
+
+
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-app.js";
+    import { getFirestore, doc, getDoc, setDoc, updateDoc, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
+
+   const firebaseConfig = {
+      apiKey: "AIzaSyCNqD93h3YDAHj_UGbrPM1rFs9pz7H1FEU",
+      authDomain: "datasaver-76a7a.firebaseapp.com",
+      projectId: "datasaver-76a7a",
+      storageBucket: "datasaver-76a7a.appspot.com",
+      messagingSenderId: "805114679296",
+      appId: "1:805114679296:web:f8a4ced30646f33d1608e5"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const username = localStorage.getItem('username');
+    const listContainer = document.getElementById('list-container');
+
+    if (!username) {
+        window.location.href = 'index.html';
+    }
+
+    window.showPopup = function() {
+        document.getElementById('popup').classList.remove('hidden');
+    };
+
+    window.saveItem = async function() {
+        const text = document.getElementById('item-text').value;
+        if (text) {
+            try {
+                const userDoc = doc(db, "users", username);
+                await updateDoc(userDoc, {
+                    button1Items: arrayUnion(text)
+                });
+                addItemToList(text);
+                document.getElementById('item-text').value = '';
+                document.getElementById('popup').classList.add('hidden');
+            } catch (error) {
+                console.error("Error saving item: ", error);
+            }
+        } else {
+            alert('Please enter some text.');
+        }
+    };
+
+    async function loadItems() {
+        const userDoc = await getDoc(doc(db, "users", username));
+        if (userDoc.exists()) {
+            const data = userDoc.data();
+            const items = data.button1Items || [];
+            items.forEach(item => addItemToList(item));
+        }
+    }
+
+    function addItemToList(item) {
+        const div = document.createElement('div');
+        div.className = 'list-item';
+        const span = document.createElement('span');
+        span.textContent = item;
+        const icons = document.createElement('div');
+        icons.className = 'icons';
+        const editIcon = document.createElement('span');
+        editIcon.className = 'icon';
+        editIcon.innerHTML = '✏️';
+        editIcon.onclick = () => editItem(item);
+        const deleteIcon = document.createElement('span');
+        deleteIcon.className = 'icon';
+        deleteIcon.innerHTML = '🗑️';
+        deleteIcon.onclick = () => deleteItem(item);
+        icons.appendChild(editIcon);
+        icons.appendChild(deleteIcon);
+        div.appendChild(span);
+        div.appendChild(icons);
+        listContainer.appendChild(div);
+    }
+
+
+    window.editItem = function(oldItem) {
+        const newItem = prompt("Edit your item:", oldItem);
+        if (newItem && newItem !== oldItem) {
+            updateItemInDatabase(oldItem, newItem);
+        }
+    };
+
+    window.deleteItem = async function(item) {
+        if (confirm("Are you sure you want to delete this item?")) {
+            try {
+                const userDoc = doc(db, "users", username);
+                await updateDoc(userDoc, {
+                    button1Items: arrayRemove(item)
+                });
+                listContainer.innerHTML = '';
+                loadItems();
+            } catch (error) {
+                console.error("Error deleting item: ", error);
+            }
+        }
+    };
+
+    async function updateItemInDatabase(oldItem, newItem) {
+        try {
+            const userDoc = doc(db, "users", username);
+            await updateDoc(userDoc, {
+                button1Items: arrayRemove(oldItem)
+            });
+            await updateDoc(userDoc, {
+                button1Items: arrayUnion(newItem)
+            });
+            listContainer.innerHTML = '';
+            loadItems();
+        } catch (error) {
+            console.error("Error updating item: ", error);
+        }
+    }
+
+    window.logout = function() {
+        localStorage.removeItem('username');
+        window.location.href = 'index.html';
+    };
+
+  window.goBack = function(){
+        window.location.href = 'chat.html';
+    }
+
+     window.cancelPopup = function() {
+        document.getElementById('popup').classList.add('hidden');
+        document.getElementById('item-text').value = '';
+    };
+    loadItems();
+
+</script>
+</body>
+</html>

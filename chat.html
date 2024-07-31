@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Page</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 350px;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        .btn-circle {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background-color: #007BFF;
+            color: white;
+            font-size: 16px;
+            border: none;
+            margin: 20px;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+        }
+        .btn-circle:hover {
+            background-color: #0056b3;
+        }
+        .btn-logout {
+            padding: 10px;
+            margin-top: 20px;
+            cursor: pointer;
+            width: 100px;
+            border: none;
+            border-radius: 4px;
+            background-color: #FF0000;
+            color: white;
+            font-size: 16px;
+        }
+        .btn-logout:hover {
+            background-color: #cc0000;
+        }
+        .back-icon {
+            cursor: pointer;
+            font-size: 24px;
+            color: #007BFF;
+        }
+        .back-icon:hover {
+            color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1> <span class="back-icon" onclick="goBack()">←</span> Welcome, <span id="username"></span>!</h1>
+    <button class="btn-circle" onclick="navigate('button1.html')">Button 1</button>
+    <button class="btn-circle" onclick="navigate('button2.html')">Button 2</button>
+    <button class="btn-circle" onclick="navigate('button3.html')">Button 3</button>
+    <button class="btn-logout" onclick="logout()">Logout</button>
+</div>
+
+<script>
+    // Retrieve the username from local storage
+    const username = localStorage.getItem('username');
+    if (username) {
+        document.getElementById('username').innerText = username;
+    } else {
+        // If username is not found, redirect to login page
+        window.location.href = 'index.html';
+    }
+
+    function navigate(page) {
+        window.location.href = page;
+    }
+
+    function logout() {
+        // Clear the username from local storage
+        localStorage.removeItem('username');
+        // Redirect to login page
+        window.location.href = 'index.html';
+    }
+
+    function goBack() {
+        window.location.href = 'index.html';
+    }
+</script>
+</body>
+</html>

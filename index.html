@@ -1,0 +1,143 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registration and Login</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+        }
+        .container {
+            width: 300px;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .hidden {
+            display: none;
+        }
+        .btn {
+            padding: 10px;
+            margin-top: 10px;
+            cursor: pointer;
+            width: 100%;
+            border: none;
+            border-radius: 4px;
+            background-color: #007BFF;
+            color: white;
+            font-size: 16px;
+        }
+        .btn:hover {
+            background-color: #0056b3;
+        }
+        input {
+            width: calc(100% - 20px);
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <!-- Registration Form -->
+    <div id="register-form">
+        Register
+        <input type="text" id="reg-username" placeholder="Username" required /><br/>
+        <input type="password" id="reg-password" placeholder="Password" required /><br/>
+        <button class="btn" onclick="register()">Register</button>
+        <button class="btn" onclick="showLogin()">Already have an account? Login</button>
+    </div>
+
+    <!-- Login Form -->
+    <div id="login-form" class="hidden">
+        Login
+        <input type="text" id="login-username" placeholder="Username" required /><br/>
+        <input type="password" id="login-password" placeholder="Password" required /><br/>
+        <button class="btn" onclick="login()">Login</button>
+        <button class="btn" onclick="showRegister()">Don't have an account? Register</button>
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-app.js";
+    import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
+
+   const firebaseConfig = {
+      apiKey: "AIzaSyCNqD93h3YDAHj_UGbrPM1rFs9pz7H1FEU",
+      authDomain: "datasaver-76a7a.firebaseapp.com",
+      projectId: "datasaver-76a7a",
+      storageBucket: "datasaver-76a7a.appspot.com",
+      messagingSenderId: "805114679296",
+      appId: "1:805114679296:web:f8a4ced30646f33d1608e5"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    window.register = async function() {
+        const username = document.getElementById('reg-username').value;
+        const password = document.getElementById('reg-password').value;
+
+        if (username && password) {
+            try {
+                await setDoc(doc(db, "users", username), { password });
+                alert('Registration successful!');
+                showLogin();
+            } catch (error) {
+                console.error("Error registering user: ", error);
+                alert('Registration failed!');
+            }
+        } else {
+            alert('Please fill in both fields.');
+        }
+    };
+
+window.login = async function() {
+    const username = document.getElementById('login-username').value;
+    const password = document.getElementById('login-password').value;
+
+    if (username && password) {
+        try {
+            const userDoc = await getDoc(doc(db, "users", username));
+            if (userDoc.exists() && userDoc.data().password === password) {
+                alert('Login successful!');
+                // Store the username in localStorage
+                localStorage.setItem('username', username);
+                window.location.href = 'chat.html';
+            } else {
+                alert('Invalid credentials.');
+            }
+        } catch (error) {
+            console.error("Error logging in: ", error);
+            alert('Login failed!');
+        }
+    } else {
+        alert('Please fill in both fields.');
+    }
+};
+
+
+    window.showRegister = function() {
+        document.getElementById('register-form').classList.remove('hidden');
+        document.getElementById('login-form').classList.add('hidden');
+    };
+
+    window.showLogin = function() {
+        document.getElementById('register-form').classList.add('hidden');
+        document.getElementById('login-form').classList.remove('hidden');
+    };
+</script>
+</body>
+</html>
